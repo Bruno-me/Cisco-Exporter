@@ -78,15 +78,24 @@ func normalizeRegex(str string) string {
 	return "^" + strings.TrimRight(strings.TrimLeft(str, "^"), "$") + "$"
 }
 
-func (dgc *DeviceGroupConfig) createInterfaceRegexp() {
+func (dgc *DeviceGroupConfig) createInterfaceRegexp() error {
 	dgc.InterfacesRegexp = make([]*regexp.Regexp, len(dgc.Interfaces))
 	for i, str := range dgc.Interfaces {
-		dgc.InterfacesRegexp[i] = regexp.MustCompile(normalizeRegex(str))
+		rgx, err := regexp.Compile(normalizeRegex(str))
+		if err != nil {
+			return err
+		}
+		dgc.InterfacesRegexp[i] = rgx
 	}
 	dgc.ExcludedInterfacesRegexp = make([]*regexp.Regexp, len(dgc.ExcludedInterfaces))
 	for i, str := range dgc.ExcludedInterfaces {
-		dgc.ExcludedInterfacesRegexp[i] = regexp.MustCompile(normalizeRegex(str))
+		rgx, err := regexp.Compile(normalizeRegex(str))
+		if err != nil {
+			return err
+		}
+		dgc.ExcludedInterfacesRegexp[i] = rgx
 	}
+	return nil
 }
 
 func (dgc *DeviceGroupConfig) MatchInterface(ifName string) bool {
@@ -155,7 +164,11 @@ func Load(reader io.Reader) (*Config, error) {
 
 	for matchStr, groupConfig := range config.DeviceGroups {
 
-		groupConfig.Matcher = glob.MustCompile(matchStr)
+		rgx, err := glob.Compile(matchStr)
+		if err != nil {
+			return nil, err
+		}
+		groupConfig.Matcher = rgx
 
 		// A glob is static, if there are no special meta signs to quote.
 		// Therefore, QuoteMeta should be a no op for static strings.
@@ -174,7 +187,10 @@ func Load(reader io.Reader) (*Config, error) {
 			groupConfig.Port = defaultPort
 		}
 
-		groupConfig.createInterfaceRegexp()
+		err = groupConfig.createInterfaceRegexp()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return config, nil
