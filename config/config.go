@@ -68,9 +68,9 @@ type DeviceGroupConfig struct {
 	CommandTimeout           int              `yaml:"command_timeout,omitempty"`
 	EnabledCollectors        []string         `yaml:"enabled_collectors,flow"`
 	Interfaces               []string         `yaml:"interfaces,flow"`
-	interfacesRegexp         []*regexp.Regexp `yaml:"-"`
+	InterfacesRegexp         []*regexp.Regexp `yaml:"-"`
 	ExcludedInterfaces       []string         `yaml:"excluded_interfaces,flow"`
-	excludedInterfacesRegexp []*regexp.Regexp `yaml:"-"`
+	ExcludedInterfacesRegexp []*regexp.Regexp `yaml:"-"`
 	EnabledVLANs             []string         `yaml:"enabled_vlans,flow"`
 }
 
@@ -79,25 +79,25 @@ func normalizeRegex(str string) string {
 }
 
 func (dgc *DeviceGroupConfig) createInterfaceRegexp() {
-	dgc.interfacesRegexp = make([]*regexp.Regexp, len(dgc.Interfaces))
+	dgc.InterfacesRegexp = make([]*regexp.Regexp, len(dgc.Interfaces))
 	for i, str := range dgc.Interfaces {
-		dgc.interfacesRegexp[i] = regexp.MustCompile(normalizeRegex(str))
+		dgc.InterfacesRegexp[i] = regexp.MustCompile(normalizeRegex(str))
 	}
-	dgc.excludedInterfacesRegexp = make([]*regexp.Regexp, len(dgc.ExcludedInterfaces))
+	dgc.ExcludedInterfacesRegexp = make([]*regexp.Regexp, len(dgc.ExcludedInterfaces))
 	for i, str := range dgc.ExcludedInterfaces {
-		dgc.excludedInterfacesRegexp[i] = regexp.MustCompile(normalizeRegex(str))
+		dgc.ExcludedInterfacesRegexp[i] = regexp.MustCompile(normalizeRegex(str))
 	}
 }
 
 func (dgc *DeviceGroupConfig) MatchInterface(ifName string) bool {
 	match := false
-	for _, r := range dgc.interfacesRegexp {
+	for _, r := range dgc.InterfacesRegexp {
 		if r.MatchString(ifName) {
 			match = true
 			break
 		}
 	}
-	for _, r := range dgc.excludedInterfacesRegexp {
+	for _, r := range dgc.ExcludedInterfacesRegexp {
 		if r.MatchString(ifName) {
 			match = false
 			break
