@@ -53,6 +53,7 @@ func init() {
 	operStatusDesc = prometheus.NewDesc(prefix+"up_info", "Interface operational status", l, nil)
 	errorStatusDesc = prometheus.NewDesc(prefix+"error_status_info", "Admin and operational status differ", l, nil)
 
+	// Regex expression to match the interface name, for example `GigabitEthernet0/5` or a variation of such in the interface summary
 	interfaceLineRegexp = regexp.MustCompile(`^\s*\*?\s(\S+)[\s\d-]*$`)
 }
 
