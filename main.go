@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -13,7 +14,6 @@ import (
 	"gitlab.com/wobcom/cisco-exporter/connector"
 
 	"github.com/pkg/errors"
-	"github.com/prometheus/common/log"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -45,7 +45,6 @@ func main() {
 	err := initialize()
 	if err != nil {
 		log.Fatalf("Failed to initialize cisco-exporter: %v", err)
-		os.Exit(1)
 	}
 
 	startServer()
@@ -73,7 +72,7 @@ func initialize() error {
 }
 
 func loadConfiguration() error {
-	log.Infof("Loading configuration from '%s'\n", *configFile)
+	log.Printf("Loading configuration from '%s'\n", *configFile)
 	yamlFile, err := ioutil.ReadFile(*configFile)
 	if err != nil {
 		return errors.Wrapf(err, "Failed to load the configuration file '%s'", *configFile)
@@ -82,12 +81,12 @@ func loadConfiguration() error {
 	if err != nil {
 		return errors.Wrap(err, "Failed to parse the configuration file")
 	}
-	log.Infof("Loaded %d static device(s) from configuration", len(configuration.GetStaticDevices()))
+	log.Printf("Loaded %d static device(s) from configuration", len(configuration.GetStaticDevices()))
 	return nil
 }
 
 func startServer() {
-	log.Infof("Starting cisco-exporter (version: %s)\n", version)
+	log.Printf("Starting cisco-exporter (version: %s)\n", version)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`<html>
             <head><title>cisco-exporter (Version ` + version + `)</title></head>
@@ -99,7 +98,7 @@ func startServer() {
 	})
 	http.HandleFunc(*metricsPath, handleMetricsRequest)
 
-	log.Infof("Listening on %s", *listenAddress)
+	log.Printf("Listening on %s", *listenAddress)
 	log.Fatal(http.ListenAndServe(*listenAddress, nil))
 }
 
@@ -123,6 +122,5 @@ func handleMetricsRequest(w http.ResponseWriter, request *http.Request) {
 	registry.MustRegister(collector)
 
 	promhttp.HandlerFor(registry, promhttp.HandlerOpts{
-		ErrorLog:      log.NewErrorLogger(),
 		ErrorHandling: promhttp.ContinueOnError}).ServeHTTP(w, request)
 }

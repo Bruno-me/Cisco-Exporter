@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"regexp"
 	"strings"
@@ -15,8 +16,6 @@ import (
 	"github.com/pkg/errors"
 
 	"golang.org/x/crypto/ssh"
-
-	"github.com/prometheus/common/log"
 )
 
 // SSHConnection wraps an *ssh.Client and provides functions for executing commands on the remote device.
@@ -63,7 +62,7 @@ func (ctx *SSHCommandContext) IgnoreOutputs() {
 			case <-ctx.Output:
 				continue
 			case err := <-ctx.Errors:
-				log.Errorf("Ignoring error: %v", err)
+				log.Printf("Ignoring error: %v", err)
 			}
 		}
 	}()
