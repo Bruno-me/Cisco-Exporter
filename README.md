@@ -72,6 +72,7 @@ Multiple collectors are available, you **must** specify which one to use.
 * **`vlans`**: Collects VLAN counters returned by a `show vlans`.
 * **`nat`**: Collects general NAT counters `show ip nat statistics` and NAT Pool counters `show ip nat pool name $name`.
 * **`local_pools`**: Collects general information about local pools by using `show ip local pool`.
+* **`wlan`**: Collects general information about wlan access point (AP2702/3702) radios using `show controller Dot11Radio`.
 
 ## Implementation details
 Upon start cisco-exporter will try to connect with all the scrape targets.

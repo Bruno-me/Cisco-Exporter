@@ -23,6 +23,7 @@ import (
 	"gitlab.com/wobcom/cisco-exporter/pppoe"
 	"gitlab.com/wobcom/cisco-exporter/users"
 	"gitlab.com/wobcom/cisco-exporter/vlans"
+	"gitlab.com/wobcom/cisco-exporter/wlan"
 
 	"github.com/pkg/errors"
 
@@ -76,6 +77,7 @@ func newCiscoCollector(targets []string, connectionManager *connector.SSHConnect
 	pppoeCollector := pppoe.NewCollector()
 	mplsCollector := mpls.NewCollector()
 	natCollector := nat.NewCollector()
+	wlanCollector := wlan.NewCollector()
 	poolCollector := local_pools.NewCollector()
 
 	collectors[memoryCollector.Name()] = memoryCollector
@@ -89,6 +91,7 @@ func newCiscoCollector(targets []string, connectionManager *connector.SSHConnect
 	collectors[pppoeCollector.Name()] = pppoeCollector
 	collectors[mplsCollector.Name()] = mplsCollector
 	collectors[natCollector.Name()] = natCollector
+	collectors[wlanCollector.Name()] = wlanCollector
 	collectors[poolCollector.Name()] = poolCollector
 
 	for _, target := range targets {
