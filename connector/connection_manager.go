@@ -3,6 +3,7 @@ package connector
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net"
 	"os"
 	"strconv"
@@ -10,8 +11,6 @@ import (
 	"time"
 
 	"gitlab.com/wobcom/cisco-exporter/config"
-
-	"github.com/prometheus/common/log"
 
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/ssh"
@@ -95,10 +94,10 @@ func (connMan *SSHConnectionManager) GetConnection(target string, deviceGroup *c
 
 	if found {
 		if !connection.IsConnected() {
-			log.Errorf("Connection to '%s' was lost, reconnecting.", target)
+			log.Printf("Connection to '%s' was lost, reconnecting.", target)
 			connection, err = connMan.establishConnection(target, deviceGroup)
 		} else if !connection.IsAuthenticated() {
-			log.Errorf("Connection to '%s' is no longer authenticated, reconnecting.", target)
+			log.Printf("Connection to '%s' is no longer authenticated, reconnecting.", target)
 			connection.Terminate()
 			connection, err = connMan.establishConnection(target, deviceGroup)
 		} else {
@@ -120,7 +119,7 @@ func (connMan *SSHConnectionManager) GetConnection(target string, deviceGroup *c
 		connMan.connectionsMutex.Unlock()
 	}
 	if connection == nil {
-		log.Error("bleep hang")
+		log.Print("bleep hang")
 	}
 	return connection, err
 }
@@ -166,7 +165,7 @@ func (connMan *SSHConnectionManager) establishConnection(target string, device *
 		return nil, errors.Wrapf(err, "Could not identify os version on '%s': %s", target, err)
 	}
 
-	log.Infof("Established an SSH connection with '%s'", target)
+	log.Printf("Established an SSH connection with '%s'", target)
 	return sshConnection, nil
 }
 

@@ -2,21 +2,22 @@ package util
 
 import (
 	"fmt"
-	"github.com/prometheus/client_golang/prometheus"
-	dto "github.com/prometheus/client_model/go"
-	"github.com/prometheus/common/log"
-	"gitlab.com/wobcom/cisco-exporter/connector"
+	"log"
 	"regexp"
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/prometheus/client_golang/prometheus"
+	dto "github.com/prometheus/client_model/go"
+	"gitlab.com/wobcom/cisco-exporter/connector"
 )
 
 // Str2float64 converts a string to float64
 func Str2float64(str string) float64 {
 	value, err := strconv.ParseFloat(str, 64)
 	if err != nil {
-		log.Fatalf("Could not parse '%s' as float!", str)
+		log.Printf("Could not parse '%s' as float!", str)
 		return -1
 	}
 	return value
@@ -80,21 +81,21 @@ func PrepareOutputForTesting(input string) connector.SSHCommandContext {
 
 // PrepareErrorForTesting takes an error and returns a ssh command context that raises the error
 func PrepareErrorForTesting(err error) connector.SSHCommandContext {
-    outputChan := make(chan string)
-    errChan := make(chan error)
-    doneChan := make(chan struct{})
+	outputChan := make(chan string)
+	errChan := make(chan error)
+	doneChan := make(chan struct{})
 
-    go func() {
-        errChan <- err
-        doneChan <- struct{}{}
-    }()
+	go func() {
+		errChan <- err
+		doneChan <- struct{}{}
+	}()
 
-    return connector.SSHCommandContext {
-        Command: "doFail",
-        Output: outputChan,
-        Errors: errChan,
-        Done: doneChan,
-    }
+	return connector.SSHCommandContext{
+		Command: "doFail",
+		Output:  outputChan,
+		Errors:  errChan,
+		Done:    doneChan,
+	}
 }
 
 // CompareMetrics asserts all metrics that are expected are present and checks their value
@@ -124,17 +125,17 @@ func CompareMetrics(got map[string]float64, expected map[string]float64, t *test
 
 // AssertMetricsUnique takes metric descriptions from a channel and asserts they are unique
 func AssertMetricsUnique(ch chan *prometheus.Desc, t *testing.T) {
-   re := regexp.MustCompile(`.*fqName: "(.*)"`)
-   fqNames := make(map[string]bool)
-   for {
-       desc, more := <- ch
-       if !more {
-           return
-       }
-       fqName := re.FindStringSubmatch(desc.String())[1]
-       if _, found := fqNames[fqName]; found {
-           t.Errorf("Describe returned metric description '%s' multiple times!", fqName)
-       }
-       fqNames[fqName] = true
-   }
+	re := regexp.MustCompile(`.*fqName: "(.*)"`)
+	fqNames := make(map[string]bool)
+	for {
+		desc, more := <-ch
+		if !more {
+			return
+		}
+		fqName := re.FindStringSubmatch(desc.String())[1]
+		if _, found := fqNames[fqName]; found {
+			t.Errorf("Describe returned metric description '%s' multiple times!", fqName)
+		}
+		fqNames[fqName] = true
+	}
 }

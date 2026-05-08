@@ -1,7 +1,7 @@
 package main
 
 import (
-	"gitlab.com/wobcom/cisco-exporter/local_pools"
+	"log"
 	"sync"
 	"time"
 
@@ -13,6 +13,7 @@ import (
 	"gitlab.com/wobcom/cisco-exporter/cpu"
 	"gitlab.com/wobcom/cisco-exporter/environment"
 	"gitlab.com/wobcom/cisco-exporter/interfaces"
+	"gitlab.com/wobcom/cisco-exporter/local_pools"
 	"gitlab.com/wobcom/cisco-exporter/memory"
 	"gitlab.com/wobcom/cisco-exporter/mpls"
 	"gitlab.com/wobcom/cisco-exporter/nat"
@@ -26,7 +27,6 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/common/log"
 )
 
 const prefix = "cisco_"
@@ -108,7 +108,7 @@ func newCiscoCollector(targets []string, connectionManager *connector.SSHConnect
 						collector = opticsXECollector
 					}
 				} else {
-					log.Errorf("Configured collector '%s' for device '%s'. No such collector", collectorName, target)
+					log.Printf("Configured collector '%s' for device '%s'. No such collector", collectorName, target)
 					continue
 				}
 			}
@@ -181,7 +181,7 @@ func runCollector(collector collector.Collector, collectorContext *collector.Col
 		case <-collectorContext.Done:
 			return errs
 		case err := <-collectorContext.Errors:
-			log.Errorf("Error while running collector %s on device %s: %v", collector.Name(), collectorContext.Connection.Target, err)
+			log.Printf("Error while running collector %s on device %s: %v", collector.Name(), collectorContext.Connection.Target, err)
 			errs = append(errs, err)
 			continue
 		}
@@ -207,14 +207,14 @@ func (c *CiscoCollector) collectForDevice(target string, deviceGroup *config.Dev
 
 		for retryCount := 0; retryCount < 2 && !success; retryCount++ {
 			if time.Since(startTime) > *scrapeTimeout {
-				log.Errorf("Ran into scrape timeout for device %s", target)
+				log.Printf("Ran into scrape timeout for device %s", target)
 				return
 			}
 
 			collectContext, err := c.createCollectContext(target, deviceGroup, ch)
 			if err != nil {
 				ciscoUp = 0
-				log.Errorf("Could not create CollectContext for device %s: %v", target, err)
+				log.Printf("Could not create CollectContext for device %s: %v", target, err)
 				continue
 			} else {
 				ciscoUp = 1
