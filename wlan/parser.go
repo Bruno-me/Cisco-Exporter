@@ -94,6 +94,7 @@ func (parser *interfaceParser) parseLine(line string) {
 		frequency, _ := strconv.ParseFloat(matches[1], 64)
 
 		labels := append(parser.interfaceLabels, "configured")
+
 		parser.metricChannel <- prometheus.MustNewConstMetric(wlanFrequencyDesc, prometheus.GaugeValue, frequency, labels...)
 
 		parser.configuredChannelSent = true
@@ -103,6 +104,7 @@ func (parser *interfaceParser) parseLine(line string) {
 		width, _ := strconv.ParseFloat(matches[3], 64)
 
 		freqLabels := append(parser.interfaceLabels, "serving")
+
 		parser.metricChannel <- prometheus.MustNewConstMetric(wlanFrequencyDesc, prometheus.GaugeValue, frequency, freqLabels...)
 		parser.metricChannel <- prometheus.MustNewConstMetric(wlanChannelWidthDesc, prometheus.GaugeValue, width, parser.interfaceLabels...)
 
@@ -135,11 +137,10 @@ func (parser *interfaceParser) parseLine(line string) {
 	} else if parser.dot11StatsFound && !parser.dot11StatsSent {
 		if line == "" {
 			parser.dot11StatsSent = true
-		} else if columnKVRegex.MatchString(line) {
-			matches := columnKVRegex.FindStringSubmatch(line)
-
+		} else if matches := columnKVRegex.FindStringSubmatch(line); matches != nil {
 			rxLabels := append(parser.interfaceLabels, "rx", interfaceRxStatMap[matches[1]])
 			txLabels := append(parser.interfaceLabels, "tx", interfaceTxStatMap[matches[3]])
+
 			parser.metricChannel <- prometheus.MustNewConstMetric(wlanStatisticsDesc, prometheus.CounterValue, util.Str2float64(matches[2]), rxLabels...)
 			parser.metricChannel <- prometheus.MustNewConstMetric(wlanStatisticsDesc, prometheus.CounterValue, util.Str2float64(matches[4]), txLabels...)
 		}
@@ -149,23 +150,20 @@ func (parser *interfaceParser) parseLine(line string) {
 		if line == "" {
 			parser.currentRate = nil
 		}
-		if rateBytesRegex.MatchString(line) {
-			matches := rateBytesRegex.FindStringSubmatch(line)
-
+		if matches := rateBytesRegex.FindStringSubmatch(line); matches != nil {
 			labels := append(parser.interfaceLabels, *parser.currentRate)
+
 			parser.metricChannel <- prometheus.MustNewConstMetric(wlanRateRxBytesDesc, prometheus.CounterValue, util.Str2float64(matches[1]), labels...)
 			parser.metricChannel <- prometheus.MustNewConstMetric(wlanRateTxBytesDesc, prometheus.CounterValue, util.Str2float64(matches[2]), labels...)
-		} else if ratePacketRegex.MatchString(line) {
-			matches := ratePacketRegex.FindStringSubmatch(line)
-
+		} else if matches := ratePacketRegex.FindStringSubmatch(line); matches != nil {
 			labels := append(parser.interfaceLabels, *parser.currentRate)
+
 			parser.metricChannel <- prometheus.MustNewConstMetric(wlanRateRxPacketsDesc, prometheus.CounterValue, util.Str2float64(matches[1]), labels...)
 			parser.metricChannel <- prometheus.MustNewConstMetric(wlanRateTxPacketsDesc, prometheus.CounterValue, util.Str2float64(matches[2]), labels...)
-		} else if rateRetriesRegex.MatchString(line) {
-			matches := rateRetriesRegex.FindStringSubmatch(line)
-
+		} else if matches := rateRetriesRegex.FindStringSubmatch(line); matches != nil {
 			rtsLabels := append(parser.interfaceLabels, *parser.currentRate, "rts")
 			dataLabels := append(parser.interfaceLabels, *parser.currentRate, "data")
+
 			parser.metricChannel <- prometheus.MustNewConstMetric(wlanRateRetriesDesc, prometheus.CounterValue, util.Str2float64(matches[1]), rtsLabels...)
 			parser.metricChannel <- prometheus.MustNewConstMetric(wlanRateRetriesDesc, prometheus.CounterValue, util.Str2float64(matches[2]), dataLabels...)
 		}
