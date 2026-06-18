@@ -18,7 +18,7 @@ const (
 
 var (
 	configuredChannelRegex = regexp.MustCompile(`^Configured Frequency: (\d+) MHz\s+Channel (\d+)( \(DFS enabled\))?`)
-	servingChannelRegex    = regexp.MustCompile(`^Serving Frequency: (\d+) MHz\s+Channel (\d+) (\d+)MHz`)
+	servingChannelRegex    = regexp.MustCompile(`^Serving Frequency: (\d+) MHz\s+Channel (\d+)\s+(\d+)MHz`)
 	txPowerRegex           = regexp.MustCompile(`^Configured TxPower:\s+(\d+) dBm \(Level Index \d+\)$`)
 
 	columnKVRegex = regexp.MustCompile(`^([a-zA-Z0-9 ]+):\s*(\d+) / \d+\s+([a-zA-Z0-9 >]+):\s*(\d+) .*$`)
