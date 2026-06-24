@@ -129,7 +129,7 @@ func (parser *interfaceParser) parseLine(line string) {
 			parser.metricChannel <- prometheus.MustNewConstMetric(wlanClientTxPacketsDesc, prometheus.CounterValue, util.Str2float64(fields[7]), labels...)
 			parser.metricChannel <- prometheus.MustNewConstMetric(wlanClientTxKilobytesDesc, prometheus.CounterValue, util.Str2float64(fields[8]), labels...)
 			parser.metricChannel <- prometheus.MustNewConstMetric(wlanClientTxRetriesDesc, prometheus.CounterValue, util.Str2float64(fields[9]), labels...)
-			parser.metricChannel <- prometheus.MustNewConstMetric(wlanClientRSSIDesc, prometheus.GaugeValue, util.Str2float64(fields[10]), labels...)
+			parser.metricChannel <- prometheus.MustNewConstMetric(wlanClientRSSIDesc, prometheus.GaugeValue, -util.Str2float64(fields[10]), labels...)
 			parser.metricChannel <- prometheus.MustNewConstMetric(wlanClientSNRDesc, prometheus.GaugeValue, util.Str2float64(fields[11]), labels...)
 		}
 	} else if !parser.clientStatsFound && !parser.clientStatsSent && line == clientStatsHeader {
